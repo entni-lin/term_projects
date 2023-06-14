@@ -1,0 +1,261 @@
+---
+title: "Term project: Classification Problems by Machine Learning"
+author: "Lily Lin"
+date: "April 25, 2023"
+output:
+  rmdformats::readthedown:
+    self_contained: FALSE
+    thumbnails: TRUE
+    lightbox: TRUE
+    gallery: TRUE
+    highlight: tango
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE)
+```
+
+# Term project: Classification Problems by Machine Learning
+
+## Introduction:
+
+Through this project, readers are anticipated to:
+
+1.  Learn how to prepare data for usage using functions in the **dplyr** package.
+
+2.  Learn how to visualize data and results to explore data (*i.e.,* obtaining some ideas regarding how each independent variable could impact a dependent variable) using functions in the **ggplot2** package.
+
+3.  Learn how to use machine learning algorithms, including logistic regression, decision tree, random forest, and support vector machine (SVM) in the **caret** package, to solve binary classification problems.
+
+4.  Learn how to run the confusion matrix to evaluate the performance of the algorithms (**caret** package).
+
+## Background:
+
+Nowadays, the needs to solve classification problems by machine learning are present in many areas, such as research, healthcare, media, business, and social use. Specifically, there is considerable growth in the needs of industry which requires data to help the decision-making process [1]. For example, Wäldchen and Mäder (2018) indicated the need to identify plants and the geographic distribution of plants to effectively study and manage biodiversity and therefore help the conversation of biodiversity [2]. However, lacking substantial botanical experts or taxonomists makes the biodiversity study more challenging. The rapid decline of diversity also highlighted the need for a new mechanism to solve the gaps. Luckily, taxonomists have discovered and utilized new techniques, such as digital cameras and applications of computer vision and image classification, resulting in improvements in meeting requirements for plant species identification [2]. This term project will focus on illustrations of the later stages of automatic species identification. Namely, instead of starting from image pre-processing and image feature extractions from plant images, this project will directly use given feature values from different plant species to train machine learning models and further classify plants using feature values (or independent variables) and trained models to show promising results of automatic classification.
+
+## Data and Methods:
+
+### Data (the data can be downloaded and the introduction can be found at Kaggle.com [3]):
+
+The **Iris flower data** is a multivariate data set by the British statistician and biologists Ronald Fisher and Edgar Anderson (who collected the data and quantified the morphological variation) [3]. Overall, this data set contains 50 samples from each of three species of Iris (Iris setosa, Iris virginica, and Iris versicolor) and four features (length and the width of the sepals and petals in centimeters) from each sample [3]. Therefore, there are 150 samples under five attributes, including Class (species), Petal Length, Petal Width, Sepal Length, and Sepal width. This data set is free and available at the UCI Machine Learning Repository. It can also be downloaded at Kaggle [3] and through the **datasets** package.
+
+### Methods
+
+1.  Data preparation methods:
+
+-   **read.csv()** function (built-in function) is used to read the CSV file and create a data frame. Some parameters can be set, such as **header** (a logical value indicating whether to use the first row as the header) and **stringsAsFactors** (a logical value indicating whether to convert character vectors to factors).
+
+Through the **dplyr** package (for data transformation):
+
+-   **%\>%** is the pipe operator to take data (if there is no pipe operator in front) or an output of a function and pass it into the next function as an argument.
+
+-   **group_by()** is the function to convert data into grouped data based on variables in a desired column.
+
+-   **sample_frac()** is the function to randomly sample a sample with a particular sample size (argument in percentage) of an original data frame. Note that for the replacement argument, if readers prefer the same data can be sampled again, the **replacement** is TRUE; if readers do not want to sample the same data repeatedly, the **replacement** is FALSE.
+
+2.  Data exploration: The **ggplot2** package is a potent tool for creating graphs and plots. The package is made of many different functions that allow users to generate a variety of plots, including scatter plot (**geom_point()**), histogram (**geom_histogram()**), kernel density plot (**geom_density()**), boxplot (**geom_boxplot()**), etc. Users can customize their desired graphs by controlling corresponding functions' corresponding arguments (such as colors, bin size, width, method, size, etc.), adding themes (**theme()**), and changing x- and y-axis labels/ticks/font size and color (**labs(), scale_x\_discrete()**, **scale_y\_discrete()**, **scale_x\_continuous()**, **scale_y\_continuous()**). Users can also overlap plots (by "+" sign) and have several plots present in one layout (by **garrange()** in the **ggpubr** package).
+
+3.  Machine learning methods: four machine learning techniques are implemented in this project, and four of them (or all of them are conducted using functions in the **caret** package). Overall, these functions use a set of independent variables to predict an outcome (class), and the prediction requires a training model via a training set to assess. The four techniques are:
+
+-   Multinomial logistic regression: multinomial logistic regression is an extension of the logistic regression model (a generalized linear model using a logic function to compute or predict the yes/no or binary outcomes). Compared to the logistic regression, multinomial is categorical with more than two levels. To conduct an multinomial logistic regression model, the **train()** function is used with the **method** argument = "multinom" .
+
+-   Decision tree: a tree detects criteria (based on input variables) and splits each item of a group into predetermined classes. To conduct a decision tree model, the **train()** function is used with the **method** argument = "rpart".
+
+-   Random forest: an ensemble of decision trees. The random forest model grows multiple decision trees and each "votes" for the class on an item to be classified [4]. To conduct a random forest model, the **train()** function is used with the **ntree** argument = n (for example, n=100 means that 100 decision trees are used to classify the data) and the **method** argument = "rf".
+
+-   Support vector machine (SVM): SVM classifies data into different classes by converting data (into different dimensions (hyperplanes) and using the hyperplanes as decision boundaries between various classes. To conduct a SVM model, the **train()** function is used with the **method** argument = "svmRadial" (kernel radial functions are used).
+
+4.  Model assessment methods: Confusion matrix: a confusion matrix is a table with the prediction against the reference (actual). Therefore, the table displays how many items are correctly and incorrectly classified, and computes accuracy, precision, recall, F-1 score, etc. The confusion matrix can be created in several ways/packages, and one way to do it is to use the **confusionMatrix()** function in the **caret** package.
+
+## Required packages
+
+```{r a, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE, results='hide'}
+library(caret)
+library(dplyr)
+library(ggplot2)
+library(ggpubr)
+library(rpart.plot)
+```
+
+## Read in data:
+
+The **setwd()** function sets up the working directory to read/load files. Through this step, since the data is in the CSV format, the **read.csv()** function is used, and both **header** and **stringsAsFactors** arguments are set as TRUE (to convert the first row of the original data into the header and convert the vector into the factor from the original data, respectively).
+
+```{r b, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE, results='hide'}
+setwd("/Users/lily_entni_lin/Desktop/R_class/term_project")
+dat <- read.csv("IRIS.csv", header=TRUE, stringsAsFactors=TRUE)
+```
+
+## Visualize and explore the data:
+
+This step is to create boxplots to visualize the relationship between species (class) and the four predictor variables using the **ggplot()** (to tell the R what data needs to be plotted) and **geom_point()** (to create a scatter plot) functions. Note that the **%\>%** operator is used first to pipe in the data to the **ggplot()** function.
+
+```{r c, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE, results='hide'}
+plot1 <- dat %>% 
+  ggplot(aes(y = sepal_length,x = species))+
+  geom_boxplot()+
+  labs(x="Species", y="Sepal Length")+
+  scale_x_discrete(expand = c(.075, .075), labels = c("Setosa", "Versicolor", "Virginica"))+
+  theme_minimal()+
+  theme(axis.text.y = element_text(size=12, color="gray40"))+
+  theme(axis.text.x = element_text(size=12, color="gray40"))
+plot2 <- dat %>% 
+  ggplot(aes(y = sepal_width,x = species))+
+  geom_boxplot()+
+  labs(x="Species", y="Sepal Width")+
+  scale_x_discrete(expand = c(.075, .075), labels = c("Setosa", "Versicolor", "Virginica"))+
+  theme_minimal()+
+  theme(axis.text.y = element_text(size=12, color="gray40"))+
+  theme(axis.text.x = element_text(size=12, color="gray40"))
+plot3 <- dat %>% 
+  ggplot(aes(y = petal_length,x =species))+
+  geom_boxplot()+
+  labs(x="Species", y="Petal Length")+
+  scale_x_discrete(expand = c(.075, .075), labels = c("Setosa", "Versicolor", "Virginica"))+
+  theme_minimal()+
+  theme(axis.text.y = element_text(size=12, color="gray40"))+
+  theme(axis.text.x = element_text(size=12, color="gray40"))
+plot4 <- dat %>% 
+  ggplot(aes(y = petal_width,x = species))+
+  geom_boxplot()+
+  labs(x="Species", y="Petal Width")+
+  scale_x_discrete(expand = c(.075, .075), labels = c("Setosa", "Versicolor", "Virginica"))+
+  theme_minimal()+
+  theme(axis.text.y = element_text(size=12, color="gray40"))+
+  theme(axis.text.x = element_text(size=12, color="gray40"))
+```
+
+The **ggarrange()** function is used to create one 2 x 2 layout (the **ncol** and **nrow** arguments control the numbers of subplots and arrangement) to include the relationship of species and each of the variables.
+
+```{r c, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE, results='hide'}
+ggarrange(plot1, plot2, plot3, plot4,ncol = 2, nrow = 2)
+```
+
+Based on the above plots, the petal length and width are the best variables to separate species, followed by the sepal length. There are overlaps between the three species, and they are difficult to separate if only using the sepal width.
+
+## Split the data into training and validation sets:
+
+First, the data frame is piped in and grouped based on each of the three species using the **group_by()** function. Next, the output of the grouped data is randomly sampled. Specifically, the **sample_frac()** function splits the data into (1) 50% of the data is used for training and (2) the remaining \~50% of the data is used for validation. Since this project does not want replicates in the training set (in some cases, if there are not enough samples, readers may use bootstrapping to have "more" data by possibly taking the same samples several times), the **replace** argument is set to FALSE. The **setdiff()** function separates the training set from the original data.
+
+```{r d, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+test <- dat %>% group_by(species) %>% sample_frac(0.5, replace=FALSE)
+val <- setdiff(dat,test)
+```
+
+## Tune parameters of models:
+
+Models can be tuned at each iteration to get the best performance of the test models. To do so, sets of parameters can be defined and evaluated at each iteration using **k-fold** cross-validation (some other cross-validation methods can be used, such as leave-one-out cross-validation and bootstrap). Specifically, 5-fold cross-validation is applied to this project, and the 5-fold means that the data set is split into five folds, and used the four folds (other than the one fold which is held out) to train the model (training folds) and the held-out fold (validation fold) to evaluate the model. This step is repeated five times to make each fold the held-out fold. This step (defining sets of parameters and selecting a cross-validation method) can be accomplished by the **trainControl()** function.
+
+Regarding the **trainControl()** function, several arguments need to be set up, including the **method** argument for the cross-validation method ("cv" for the k-fold cross-validation), the **number** argument for the number of folds or the number of resampling per iteration, the **verboseIter** argument is a logical value - if it is TRUE, the training log will be printed out; if it is FALSE, the training log won't be printed out. Furthermore, there is a **set.seed()** function in front of the **trainControl()** function; this is to create reproducible sets of values. In this project, **n=42** is set (42 reproducible sets of numbers, sufficient for the sets of tuning parameters).
+
+```{r d, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+set.seed(42)
+trainctrl <- trainControl(method = "cv", number = 5, verboseIter = FALSE)
+```
+
+## Train models:
+
+The **train()** function will conduct the training processes for different methods. The first two arguments in the **train()** function are the input data or training set. Since this project uses all four variables to predict the flower species, instead of typing each of the four variables out, a "**.**"symbol behind the "**\~**"symbol (species are related to variables behind the "**\~**"symbol) is used to connect the dependent variable species to all four variables. The **trControl** argument is for the tunning values and setup (if present). The **method** argument is to select a desired method to train the model. The **trace** argument is a logical value - if TRUE, the training log will be printed out (the argument is only used when training the logistic model). The **tuneLength** argument is the number of each tunning parameter (hyperparameters) generated (the larger, the finer model - but it takes more time). The **preProcess** function is to pre-process (*i.e.,* center and scale) predictors of the training data. Lastly, several metrics can measure the model's performance, including accuracy, kappa (a variation of accuracy corrected for category imbalances), sensitivity, and specificity. Note that there is a **set.seed()** function in front of each of the **train()** functions to create sets of reproducible random numbers (avoid different results if running the **train()** function again).
+
+1.  the multinomial logistic regression model: the **method** argument is "multinom" for the multinomial logistic regression model (more than two classes)
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+set.seed(42)
+log.model <- train(species~., data=test ,trControl = trainctrl, method = "multinom", trace=FALSE, tuneLength = 10, preProcess = c("center", "scale"), metric="Kappa")
+```
+
+2.  the decision tree model (the **method** argument is "rpart")
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+set.seed(42)
+dt.model <- train(species~., data=test, method = "rpart",
+tuneLength = 10, preProcess = c("center", "scale"), trControl = trainctrl,
+metric="Kappa")
+```
+
+3.  the random firest model (the **method** argument is "rf", the **ntree** argument is 101 for the creation of 101 decision trees, and the **importance** argument is TRUE to compute importance of each variable). Note that the **tuneLength** is 3 instead of 10 because of the warning "note: only 3 unique complexity parameters in default grid. Truncating the grid to 3".
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+set.seed(42)
+rf.model <- train(species~., data=test, method = "rf", ntree=101, tuneLength = 3, preProcess = c("center", "scale"), trControl = trainctrl, metric="Kappa", importance = TRUE)
+```
+
+4.  the SVM model (the **method** argument is "svmRadial" )
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+set.seed(42)
+svm.model <- train(species~., data=test, method = "svmRadial", 
+tuneLength = 10, preProcess = c("center", "scale"), trControl = trainctrl,
+metric="Kappa")
+```
+
+## Predict results using the validation set:
+
+The **predict()** function is used, and the arguments are the training model and the validation set.
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+log.predict <- predict(log.model, val)
+dt.predict <- predict(dt.model, val)
+rf.predict <- predict(rf.model, val)
+svm.predict <-predict(svm.model, val)
+```
+
+## Compute the confusion matrix for each of the models:
+
+The **confusionMatrix()** function is applied with the two arguments: the predictions and the actual classes or references.
+
+1.  Multinomial logistic regression
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+confusionMatrix(log.predict, val$species)
+```
+
+2.  Decision tree
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+confusionMatrix(dt.predict, val$species)
+```
+
+For the decision tree, the final decision tree can be plotted with the **prp()** function in the **rpart.plot** package. To do so, the **finalModel** list from the **dt.model** list has to be called.
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+prp(dt.model$finalModel)
+```
+
+3.  Random forest
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+confusionMatrix(rf.predict, val$species)
+```
+
+For the random forest model, the importance of each variable can be measured, and it is internal information. The internal information can be printed out using the **importance()** function with the list of the **finalModel**. Specifically, the importance of each model is represented by **MeanDecreaseAccuracy** and **MeanDecreaseGini**.
+
+To interpret the values, the higher decreaseAccuracy and decreaseGini are, the more important the variable is. The **MeanDecreaseAccuracy** means the number or proportion of incorrectly classified observations without the variable. For example, if removing petal_length to create a model, 11.835 accuracy will lose. The **MeanDecreaseGini** measures how each variable contributes to the homogeneity of the nodes and leaves in the resulting random forest.
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+importance(rf.model$finalModel)
+```
+
+4.  SVM
+
+```{r e, echo=TRUE, comment="", collapse=TRUE, warning=FALSE, message=FALSE}
+confusionMatrix(svm.predict, val$species)
+```
+
+## Results and Discussion
+
+Based on the Kappa results from the confusion matrices, all four models have the same Kappa statics (0.9589), which indicates the four models are suitable for classifying the Iris flower species (all of them have the Kappa \> 0.9). Regarding which flower is the least confusing, Iris-setosa is always classified correctly (balanced accuracy = 1) over the four models. In contrast, Iris-virginica is the relatively confusing due to the lowest balanced accuracy (0.9690) over the four models. Another observation is that when Iris-versicolor is incorrectly classified, it is classified into Iris-virginica. Similarly, when Iris-virginica is incorrectly classified, it is classified into Iris-versicolor. Lastly, petal width is the most important variable (MeanDecreaseAccuracy = 14.9534) to classify the Iris flowers, followed by the petal length (MeanDecreaseAccuracy = 13.1502). The least important variable is the sepal width (MeanDecreaseAccuracy = -1.8734). Based on the final model of the decision tree, the two variables used to classify the species are the petal width and length, which again proves that these two variables are the most important ones.
+
+## Conclusions
+
+The four models, multinomial logistic regression, the decision tree, the random forest, and the SVM, perform well when classifying the three species of Iris flowers. Regarding the importance of variables, the petal width is the most important variable, and the petal length is the second important one. The sepal width, however, is the least important variable among the four variables. Furthermore, in terms of how difficult to classify each of the Iris flower species, Iris-setosa is the easiest type for classification among the four models due to the highest accuracy, the Iris-versicolor is the in the middle, and Iris-virginica is the most difficult or confusing one.
+
+## References
+
+1\. Jones, S., Ye, Z., Xie, Z., Root, C., Prasutchai, T., Anderson, J., ... & Lanham, M. A. A Proposed Data Analytics Workflow and Example Using the R Caret Package. In CONFERENCE PROCEEDINGS BY TRACK (p. 49).
+
+2\. Wäldchen, J., & Mäder, P. (2018). Plant species identification using computer vision techniques: A systematic literature review. Archives of Computational Methods in Engineering, 25, 507-543.
+
+3\. [Iris flower datat set at Kaggle](https://www.kaggle.com/datasets/arshid/iris-flower-dataset)
+
+4\. Herzig, K., Just, S., Rau, A., & Zeller, A. (2013, November). Predicting defects using change genealogies. In 2013 IEEE 24th International Symposium on Software Reliability Engineering (ISSRE) (pp. 118-127). IEEE.
